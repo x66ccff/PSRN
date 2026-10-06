@@ -1427,18 +1427,7 @@ class PSRN_Regressor(nn.Module):
     def get_best_expr_and_MSE(self, X, Y):
 
         with torch.no_grad():
-            sum_ = torch.zeros((1, self.net.out_dim), device=self.net.device)
-            for i in range(X.shape[0]):
-                H = self.net.forward(X[i].reshape(1, -1))
-                diff = H - Y[i]
-                square = diff**2
-                sum_ += square
-            mean = sum_ / X.shape[0]
-            mean = mean.reshape(-1)
-
-            # replace all nan, -inf to inf
-            mean[torch.isnan(mean)] = float("inf")
-            mean[torch.isinf(mean)] = float("inf")
+            mean = self.net.score_mse(X, Y)
 
             min_value, min_index = torch.min(mean, dim=0)
 
@@ -1454,18 +1443,7 @@ class PSRN_Regressor(nn.Module):
         self.fitted_expr_c_set = set()
 
         with torch.no_grad():
-            sum_ = torch.zeros((1, self.net.out_dim), device=self.net.device)
-            for i in range(X.shape[0]):
-                H = self.net.forward(X[i].reshape(1, -1))
-                diff = H - Y[i]
-                square = diff**2
-                sum_ += square
-            mean = sum_ / X.shape[0]
-            mean = mean.reshape(-1)
-
-            # replace all nan, -inf to inf
-            mean[torch.isnan(mean)] = float("inf")
-            mean[torch.isinf(mean)] = float("inf")
+            mean = self.net.score_mse(X, Y)
 
             values, indices = torch.topk(mean, n_top, largest=False, sorted=True)
             MSE_min_ls = values.tolist()
